@@ -59,12 +59,10 @@ export function Navbar() {
   };
 
   const handleSwitchPortal = (targetRole: 'interviewer' | 'candidate') => {
-    const updated = switchRole(targetRole);
-    setUser(updated);
     if (targetRole === 'interviewer') {
-      router.push('/interviewer');
+      router.push('/login?portal=interviewer');
     } else {
-      router.push('/candidate');
+      router.push('/login?portal=student');
     }
   };
 
@@ -160,9 +158,13 @@ export function Navbar() {
             <span className="text-white font-medium max-w-[130px] truncate">
               {isCandidateSection ? (user?.name || 'Alex Morgan') : (user?.name?.split(' ')[0] || 'Recruiter')}
             </span>
-            {isCandidateSection && (user?.rollNo || '2023-CS-101') && (
+            {isCandidateSection ? (
               <span className="font-mono text-cyan-400 text-[11px] font-bold">
-                ({user?.rollNo || '2023-CS-101'})
+                (Roll: {user?.rollNo || '2023-CS-101'})
+              </span>
+            ) : (
+              <span className="font-mono text-indigo-400 text-[11px] font-bold">
+                (ID: {user?.recruiterId || 'REC-2026-904'})
               </span>
             )}
           </div>

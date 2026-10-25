@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Camera,
@@ -17,7 +18,11 @@ import {
   Clock,
   ArrowRight,
   Sparkles,
-  Bot
+  Bot,
+  Briefcase,
+  Check,
+  Hash,
+  Award
 } from 'lucide-react';
 import {
   InterviewCampaign,
@@ -40,7 +45,7 @@ import { SAMPLE_RESUME_A, SAMPLE_RESUME_B } from '@/lib/samples';
 
 export default function CandidatePortalPage() {
   return (
-    <Suspense fallback={<div className="p-12 text-center text-slate-400">Loading Candidate Portal...</div>}>
+    <Suspense fallback={<div className="p-12 text-center text-slate-400">Loading Student Portal...</div>}>
       <CandidatePortalContent />
     </Suspense>
   );
@@ -51,9 +56,10 @@ function CandidatePortalContent() {
   const searchParams = useSearchParams();
 
   const [campaigns, setCampaigns] = useState<InterviewCampaign[]>([]);
+  // DO NOT auto-select by default: student must select one among available!
   const [selectedCampaign, setSelectedCampaign] = useState<InterviewCampaign | null>(null);
 
-  // Verification Form State
+  // Student Identity Form State
   const [name, setName] = useState('Alex Morgan');
   const [rollNo, setRollNo] = useState('2023-CS-101');
   const [email, setEmail] = useState('alex.morgan.demo@interviewx.ai');
@@ -79,12 +85,11 @@ function CandidatePortalContent() {
       setSelectedResume(rList[0]);
     }
 
+    // Only auto-select if a specific campaignId was passed in the URL
     const campaignId = searchParams.get('campaignId');
     if (campaignId) {
       const match = cList.find((c) => c.id === campaignId);
       if (match) setSelectedCampaign(match);
-    } else if (cList.length > 0) {
-      setSelectedCampaign(cList[0]);
     }
 
     const currentUser = getCurrentUser();
@@ -135,7 +140,10 @@ function CandidatePortalContent() {
   }, [name, rollNo, email, phone, selectedResume]);
 
   const handleLaunchInterview = () => {
-    if (!selectedCampaign) return;
+    if (!selectedCampaign) {
+      alert('Please select an interview campaign among the available drives first.');
+      return;
+    }
 
     const openStatus = isCampaignOpen(selectedCampaign);
     if (!openStatus.isOpen) {
@@ -202,98 +210,322 @@ function CandidatePortalContent() {
     router.push(`/interview/room?id=${newSession.id}&proctored=true`);
   };
 
-  const openStatus = selectedCampaign ? isCampaignOpen(selectedCampaign) : { isOpen: false };
+  const openStatus = selectedCampaign ? isCampaignOpen(selectedCampaign) : { isOpen: false, reason: 'Please select an interview drive first.' };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      {/* Header */}
-      <div className="space-y-2 text-center sm:text-left">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-medium border border-cyan-500/20">
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>AI Proctored Candidate Portal</span>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+      {/* Top Banner Header */}
+      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl">
+        <div className="space-y-1.5">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-semibold border border-cyan-500/30">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>AI Proctored Student Examination Portal</span>
+          </div>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">
+            Student Assessment Lobby
+          </h1>
+          <p className="text-xs text-slate-300 flex items-center gap-2 flex-wrap">
+            <span>Student: <span className="text-white font-semibold">{name}</span></span>
+            <span>•</span>
+            <span className="font-mono text-cyan-300 font-bold px-2 py-0.5 rounded-lg bg-cyan-950/80 border border-cyan-500/30">
+              Roll No: {rollNo}
+            </span>
+            <span>•</span>
+            <span>{email}</span>
+          </p>
         </div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">
-          Candidate Onboarding & Identity Verification
-        </h1>
-        <p className="text-sm text-slate-400">
-          Complete device permissions, cross-verify your details with your resume, and begin your video-recorded mock interview.
-        </p>
+
+        <div className="flex items-center gap-3">
+          <Link
+            href="/login?portal=student"
+            className="px-4 py-2 rounded-xl text-xs font-semibold glass-panel text-slate-300 hover:text-white border border-slate-700 transition-colors"
+          >
+            Change Roll No
+          </Link>
+          <Link
+            href="/login?portal=interviewer"
+            className="px-4 py-2 rounded-xl text-xs font-semibold glass-panel text-indigo-300 hover:text-white border border-indigo-500/30 transition-colors"
+          >
+            Interviewer Portal
+          </Link>
+        </div>
       </div>
 
-      {/* STEP 1: CAMPAIGN SELECTION & SCHEDULE CHECK */}
-      <div className="glass-panel p-6 rounded-3xl space-y-4 border border-indigo-500/30">
-        <div className="flex items-center justify-between">
-          <h3 className="font-bold text-white text-base flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-cyan-400" />
-            <span>Select Interview Campaign & Review Deadlines</span>
-          </h3>
-          {selectedCampaign && (
-            <span
-              className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${
-                openStatus.isOpen
-                  ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/30'
-                  : 'bg-rose-950/60 text-rose-300 border-rose-500/30'
-              }`}
-            >
-              {openStatus.isOpen ? 'Window Active' : 'Submissions Closed'}
-            </span>
-          )}
+      {/* STEP 1: SELECT ONE INTERVIEW AMONG AVAILABLE DRIVES */}
+      <div className="glass-panel p-6 sm:p-8 rounded-3xl space-y-6 border border-indigo-500/30">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-800">
+          <div>
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-cyan-400 uppercase tracking-wider mb-1">
+              <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-300 flex items-center justify-center text-[11px] font-black">
+                1
+              </span>
+              <span>Step 1: Choose Your Interview Drive</span>
+            </div>
+            <h2 className="text-xl font-bold text-white">
+              Select One Interview Among Available Positions
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Select the role you are applying for. The AI Interviewer will evaluate your introduction, resume, and role-specific concepts.
+            </p>
+          </div>
+          <span className="text-xs px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-300 font-medium self-start sm:self-center">
+            {campaigns.length} Active Drives Available
+          </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">
-              Active Job Campaign:
-            </label>
-            <select
-              value={selectedCampaign?.id || ''}
-              onChange={(e) => {
-                const found = campaigns.find((c) => c.id === e.target.value);
-                if (found) setSelectedCampaign(found);
-              }}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white"
-            >
-              {campaigns.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.title} ({c.targetRole})
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Available Campaigns Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {campaigns.map((camp) => {
+            const isSelected = selectedCampaign?.id === camp.id;
+            const campStatus = isCampaignOpen(camp);
 
-          {selectedCampaign && (
-            <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs space-y-1">
-              <div className="flex justify-between text-slate-400">
-                <span>Submission Window:</span>
-                <span className="text-slate-200 font-mono text-[11px]">
-                  Until {new Date(selectedCampaign.endDate).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                </span>
+            return (
+              <div
+                key={camp.id}
+                onClick={() => {
+                  if (campStatus.isOpen) {
+                    setSelectedCampaign(camp);
+                  }
+                }}
+                className={`p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-4 relative ${
+                  isSelected
+                    ? 'bg-gradient-to-b from-indigo-950/80 to-slate-900/90 border-cyan-400 ring-2 ring-cyan-400/40 shadow-lg shadow-cyan-500/20'
+                    : campStatus.isOpen
+                    ? 'bg-slate-900/60 hover:bg-slate-900/90 border-slate-800 hover:border-slate-700'
+                    : 'bg-slate-950/40 border-slate-850 opacity-60 cursor-not-allowed'
+                }`}
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
+                      {camp.targetRole}
+                    </span>
+                    <span
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border ${
+                        campStatus.isOpen
+                          ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/30'
+                          : 'bg-rose-950/60 text-rose-300 border-rose-500/30'
+                      }`}
+                    >
+                      {campStatus.isOpen ? 'Accepting Responses' : 'Closed'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="font-bold text-white text-base leading-snug">{camp.title}</h3>
+                    <p className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                      {camp.jobDescription}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-slate-800/80 space-y-2.5 text-xs">
+                  <div className="flex items-center justify-between text-slate-400 text-[11px]">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Duration:</span>
+                    </div>
+                    <span className="font-bold text-white">{camp.timeLimitMinutes} Minutes</span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-slate-400 text-[11px]">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Deadline:</span>
+                    </div>
+                    <span className="font-mono text-slate-300">
+                      {new Date(camp.endDate).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                  </div>
+
+                  {/* Selection Button */}
+                  <div className="pt-1">
+                    {isSelected ? (
+                      <div className="w-full py-2 rounded-xl text-xs font-bold bg-cyan-500 text-slate-950 flex items-center justify-center gap-1.5 shadow-md">
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                        <span>Selected for Interview</span>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={!campStatus.isOpen}
+                        className="w-full py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white transition-colors border border-slate-700"
+                      >
+                        {campStatus.isOpen ? 'Select This Interview' : 'Deadline Passed'}
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between text-slate-400">
-                <span>Time Limit:</span>
-                <span className="text-cyan-400 font-bold">{selectedCampaign.timeLimitMinutes} Minutes</span>
+            );
+          })}
+        </div>
+
+        {/* Selected Campaign Confirmation Alert */}
+        {selectedCampaign ? (
+          <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 text-xs text-cyan-200 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <CheckCircle2 className="w-5 h-5 text-cyan-400 shrink-0" />
+              <div>
+                <span className="font-bold text-white">Active Selection: </span>
+                <span>{selectedCampaign.title} • Role: <strong className="text-cyan-300">{selectedCampaign.targetRole}</strong> ({selectedCampaign.timeLimitMinutes} min limit).</span>
               </div>
             </div>
-          )}
-        </div>
-
-        {!openStatus.isOpen && (
-          <div className="p-3.5 rounded-xl bg-rose-950/60 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400" />
-            <span>{openStatus.reason}</span>
+            <span className="text-[11px] font-semibold text-slate-400">
+              Ready for verification below ↓
+            </span>
+          </div>
+        ) : (
+          <div className="p-4 rounded-2xl bg-indigo-950/30 border border-indigo-500/20 text-xs text-indigo-300 flex items-center gap-2.5">
+            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+            <span>Please click on an interview drive card above to select which position you wish to take.</span>
           </div>
         )}
       </div>
 
-      {/* STEP 2: CAMERA & MICROPHONE PERMISSIONS */}
-      <div className="glass-panel p-6 rounded-3xl space-y-4 border border-indigo-500/30">
-        <h3 className="font-bold text-white text-base flex items-center gap-2">
-          <Camera className="w-4 h-4 text-cyan-400" />
-          <span>Device Permissions & Video Recording Check</span>
-        </h3>
-        <p className="text-xs text-slate-300 leading-relaxed">
-          The bot records your video and vocal responses. During the interview, live proctoring monitors if your face moves out of camera frame, if your face is obscured, or if tabs are switched.
-        </p>
+      {/* STEP 2: STUDENT DETAILS & RESUME VERIFICATION */}
+      <div className={`glass-panel p-6 sm:p-8 rounded-3xl space-y-5 border transition-all ${selectedCampaign ? 'border-indigo-500/30 opacity-100' : 'border-slate-800 opacity-60 pointer-events-none'}`}>
+        <div className="pb-2 border-b border-slate-800">
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-cyan-400 uppercase tracking-wider mb-1">
+            <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-300 flex items-center justify-center text-[11px] font-black">
+              2
+            </span>
+            <span>Step 2: Student Details & Resume Verification</span>
+          </div>
+          <h2 className="text-xl font-bold text-white">
+            Candidate Profile & Identity Cross-Verification
+          </h2>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Your details are cross-matched against your uploaded resume to ensure authenticity.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label className="text-xs font-semibold text-slate-300 block mb-1">
+              Roll No. / Student ID <span className="text-cyan-400">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. 2023-CS-101"
+              value={rollNo}
+              onChange={(e) => setRollNo(e.target.value)}
+              className="w-full bg-slate-900 border border-cyan-500/50 rounded-xl p-2.5 text-xs text-cyan-300 font-mono font-bold"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-slate-300 block mb-1">
+              Student Full Name <span className="text-cyan-400">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Alex Morgan"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-slate-300 block mb-1">
+              Email Address <span className="text-cyan-400">*</span>
+            </label>
+            <input
+              type="email"
+              required
+              placeholder="e.g. alex@university.edu"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-slate-300 block mb-1">Contact Phone</label>
+            <input
+              type="text"
+              placeholder="+91 98765 43210"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white"
+            />
+          </div>
+        </div>
+
+        {/* Resume Selector */}
+        <div>
+          <label className="text-xs font-semibold text-slate-300 block mb-1">Select Candidate Resume for AI Extraction</label>
+          <select
+            value={selectedResume?.id || ''}
+            onChange={(e) => {
+              const match = resumes.find((r) => r.id === e.target.value);
+              if (match) setSelectedResume(match);
+            }}
+            className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white"
+          >
+            {resumes.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.fileName} — {r.parsed.fullName} ({r.parsed.skills.slice(0, 3).join(', ')})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Live Matching Results Box */}
+        {verificationResult && (
+          <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-white">Resume Matching Verification:</span>
+              <span className="font-bold text-cyan-400">
+                Match Score: {verificationResult.verificationScore}%
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-[11px]">
+              <div>
+                Name Check:{' '}
+                <span className={verificationResult.nameMatch ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
+                  {verificationResult.nameMatch ? '✓ Verified with Resume' : '⚠ Discrepancy'}
+                </span>
+              </div>
+              <div>
+                Contact Check:{' '}
+                <span className={verificationResult.contactMatch ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
+                  {verificationResult.contactMatch ? '✓ Verified' : '⚠ Alternate Contacts'}
+                </span>
+              </div>
+            </div>
+
+            {verificationResult.discrepancies.length > 0 && (
+              <ul className="text-[11px] text-amber-300 list-disc list-inside space-y-0.5 pt-1">
+                {verificationResult.discrepancies.map((d, i) => (
+                  <li key={i}>{d}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* STEP 3: CAMERA & MICROPHONE PERMISSIONS */}
+      <div className={`glass-panel p-6 sm:p-8 rounded-3xl space-y-5 border transition-all ${selectedCampaign ? 'border-indigo-500/30 opacity-100' : 'border-slate-800 opacity-60 pointer-events-none'}`}>
+        <div className="pb-2 border-b border-slate-800">
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-cyan-400 uppercase tracking-wider mb-1">
+            <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-300 flex items-center justify-center text-[11px] font-black">
+              3
+            </span>
+            <span>Step 3: Device Permissions & Video Recording Check</span>
+          </div>
+          <h2 className="text-xl font-bold text-white">
+            Camera & Microphone Proctoring Test
+          </h2>
+          <p className="text-xs text-slate-400 mt-0.5">
+            The bot records candidate video and monitors facial presence, tab switches, and vocal answer transcripts.
+          </p>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           {/* Live Preview Box */}
@@ -358,136 +590,22 @@ function CandidatePortalContent() {
         </div>
       </div>
 
-      {/* STEP 3: CANDIDATE IDENTITY & RESUME CROSS-MATCH */}
-      <div className="glass-panel p-6 rounded-3xl space-y-5 border border-indigo-500/30">
-        <h3 className="font-bold text-white text-base flex items-center gap-2">
-          <User className="w-4 h-4 text-cyan-400" />
-          <span>Candidate Information & Resume Cross-Verification</span>
-        </h3>
-        <p className="text-xs text-slate-300 leading-relaxed">
-          Provide your declared details and resume. The system will cross-verify your identity against extracted resume credentials before proceeding.
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">
-              Student Full Name <span className="text-cyan-400">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Alex Morgan"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">
-              Roll No. / Student ID <span className="text-cyan-400">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. 2023-CS-101"
-              value={rollNo}
-              onChange={(e) => setRollNo(e.target.value)}
-              className="w-full bg-slate-900 border border-indigo-500/50 rounded-xl p-2.5 text-xs text-cyan-300 font-mono font-semibold"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">
-              Email Address <span className="text-cyan-400">*</span>
-            </label>
-            <input
-              type="email"
-              required
-              placeholder="e.g. alex@university.edu"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Contact Phone</label>
-            <input
-              type="text"
-              placeholder="+91 98765 43210"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white"
-            />
-          </div>
-        </div>
-
-        {/* Resume Selector */}
-        <div>
-          <label className="text-xs font-semibold text-slate-300 block mb-1">Selected Resume</label>
-          <select
-            value={selectedResume?.id || ''}
-            onChange={(e) => {
-              const match = resumes.find((r) => r.id === e.target.value);
-              if (match) setSelectedResume(match);
-            }}
-            className="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white"
-          >
-            {resumes.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.fileName} — {r.parsed.fullName}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Live Matching Results Box */}
-        {verificationResult && (
-          <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2 text-xs">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-white">Cross-Matching Result:</span>
-              <span className="font-bold text-cyan-400">
-                Verification Score: {verificationResult.verificationScore}%
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
-              <div>
-                Name Check:{' '}
-                <span className={verificationResult.nameMatch ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
-                  {verificationResult.nameMatch ? '✓ Matches Resume' : '⚠ Discrepancy'}
-                </span>
-              </div>
-              <div>
-                Contact Check:{' '}
-                <span className={verificationResult.contactMatch ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
-                  {verificationResult.contactMatch ? '✓ Verified' : '⚠ Differing Contacts'}
-                </span>
-              </div>
-            </div>
-
-            {verificationResult.discrepancies.length > 0 && (
-              <ul className="text-[11px] text-amber-300 list-disc list-inside space-y-0.5 pt-1">
-                {verificationResult.discrepancies.map((d, i) => (
-                  <li key={i}>{d}</li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* LAUNCH BUTTON */}
+      {/* STEP 4: LAUNCH BUTTON */}
       <div className="pt-2">
         <button
           type="button"
           onClick={handleLaunchInterview}
-          disabled={!openStatus.isOpen || !hasCameraPerm || !hasMicPerm}
-          className="w-full py-4 rounded-2xl font-bold text-sm bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white shadow-xl shadow-indigo-600/30 flex items-center justify-center gap-2.5 disabled:opacity-50 transition-all"
+          disabled={!selectedCampaign || !openStatus.isOpen || !hasCameraPerm || !hasMicPerm}
+          className="w-full py-4 rounded-2xl font-bold text-sm bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white shadow-xl shadow-indigo-600/30 flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           <Bot className="w-4 h-4" />
-          <span>Launch Proctored Video Interview Now</span>
+          <span>
+            {!selectedCampaign
+              ? '1. Please Select an Interview Drive Above to Continue'
+              : !hasCameraPerm || !hasMicPerm
+              ? '2. Please Grant Camera & Microphone Access Above to Continue'
+              : `Begin Proctored Video Interview for ${selectedCampaign.targetRole} (${selectedCampaign.timeLimitMinutes} Mins)`}
+          </span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

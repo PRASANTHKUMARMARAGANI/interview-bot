@@ -24,6 +24,7 @@ export interface UserAuth {
   email: string;
   organization?: string;
   rollNo?: string;
+  recruiterId?: string;
 }
 
 export interface ResumeData {

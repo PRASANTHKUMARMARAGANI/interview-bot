@@ -33,9 +33,10 @@ export const DEFAULT_SETTINGS: AppSettings = {
 
 export const DEFAULT_INTERVIEWER_USER: UserAuth = {
   role: 'interviewer',
-  name: 'Sarah Jenkins (Recruiter / Hiring Manager)',
+  name: 'Sarah Jenkins',
   email: 'sarah.recruiter@interviewx.ai',
-  organization: 'TechVision Enterprise Talent'
+  organization: 'TechVision Enterprise Talent',
+  recruiterId: 'REC-2026-904'
 };
 
 export const DEFAULT_CANDIDATE_USER: UserAuth = {
@@ -151,66 +152,154 @@ export function saveResume(resume: ResumeData): ResumeData[] {
 // ==========================================
 // RECRUITER INTERVIEW CAMPAIGNS
 // ==========================================
-const DEFAULT_CAMPAIGN: InterviewCampaign = {
-  id: 'campaign-frontend-2026',
-  title: 'Senior Frontend Engineer Recruitment Drive',
-  targetRole: 'Frontend Developer',
-  jobDescription:
-    'Seeking an experienced engineer proficient in Next.js, React 19, TypeScript, and Core Web Vitals optimization to architect user-facing enterprise platforms.',
-  department: 'Core Web Platform Engineering',
-  startDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-  endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days in future
-  timeLimitMinutes: 20,
-  status: 'active',
-  questionSource: 'hybrid',
-  createdBy: 'sarah.recruiter@interviewx.ai',
-  createdAt: '2026-10-24T10:00:00.000Z',
-  totalSubmissionsCount: 1,
-  questions: [
-    {
-      id: 'cq-1',
-      questionNumber: 1,
-      category: 'Resume-Project',
-      difficulty: 'Intermediate',
-      questionText: 'Can you walk us through the most technically demanding web application you have architected, highlighting the performance metrics achieved?',
-      expectedConcepts: ['Component Architecture', 'Core Web Vitals', 'State Management', 'Latency Reduction'],
-      rubric: {
-        technicalCorrectness: 'Technical precision of frameworks used',
-        relevance: 'Directly addresses real-world project outcomes',
-        reasoning: 'Explains architectural trade-offs',
-        communication: 'Clear and structured presentation'
+export const DEFAULT_CAMPAIGNS: InterviewCampaign[] = [
+  {
+    id: 'campaign-frontend-2026',
+    title: 'Senior Frontend Engineer Recruitment Drive',
+    targetRole: 'Frontend Developer',
+    jobDescription:
+      'Seeking a skilled frontend engineer proficient in Next.js, React 19, TypeScript, and Core Web Vitals optimization to architect user-facing enterprise platforms.',
+    department: 'Core Web Platform Engineering',
+    startDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    timeLimitMinutes: 20,
+    status: 'active',
+    questionSource: 'hybrid',
+    createdBy: 'sarah.recruiter@interviewx.ai',
+    createdAt: '2026-10-24T10:00:00.000Z',
+    totalSubmissionsCount: 1,
+    questions: [
+      {
+        id: 'cq-1',
+        questionNumber: 1,
+        category: 'Resume-Project',
+        difficulty: 'Intermediate',
+        questionText: 'Can you walk us through the most technically demanding web application you have architected, highlighting the performance metrics achieved?',
+        expectedConcepts: ['Component Architecture', 'Core Web Vitals', 'State Management', 'Latency Reduction'],
+        rubric: {
+          technicalCorrectness: 'Technical precision of frameworks used',
+          relevance: 'Directly addresses real-world project outcomes',
+          reasoning: 'Explains architectural trade-offs',
+          communication: 'Clear and structured presentation'
+        },
+        modelAnswerHint: 'Detail project stack, performance auditing, and quantitative user impact.'
       },
-      modelAnswerHint: 'Detail project stack, performance auditing, and quantitative user impact.'
-    },
-    {
-      id: 'cq-2',
-      questionNumber: 2,
-      category: 'Technical',
-      difficulty: 'Intermediate',
-      questionText: 'Explain how you approach optimizing Next.js bundle sizes and preventing layout shift (CLS) in high-traffic applications.',
-      expectedConcepts: ['Dynamic Imports', 'Code Splitting', 'next/image aspect ratio', 'Font optimization'],
-      rubric: {
-        technicalCorrectness: 'Deep understanding of Web Vitals and bundler internals',
-        relevance: 'Concrete optimization methodologies',
-        reasoning: 'Prioritizes user experience metrics',
-        communication: 'Concise technical vocabulary'
+      {
+        id: 'cq-2',
+        questionNumber: 2,
+        category: 'Technical',
+        difficulty: 'Intermediate',
+        questionText: 'Explain how you approach optimizing Next.js bundle sizes and preventing layout shift (CLS) in high-traffic applications.',
+        expectedConcepts: ['Dynamic Imports', 'Code Splitting', 'next/image aspect ratio', 'Font optimization'],
+        rubric: {
+          technicalCorrectness: 'Deep understanding of Web Vitals and bundler internals',
+          relevance: 'Concrete optimization methodologies',
+          reasoning: 'Prioritizes user experience metrics',
+          communication: 'Concise technical vocabulary'
+        },
+        modelAnswerHint: 'Discuss @next/bundle-analyzer, dynamic imports, explicit image dimensions, and font swapping.'
+      }
+    ]
+  },
+  {
+    id: 'campaign-aiml-2026',
+    title: 'AI & Machine Learning Research Engineering Drive',
+    targetRole: 'AI / ML Engineer',
+    jobDescription:
+      'Seeking an AI/ML specialist with experience in Large Language Models, PyTorch, LoRA/PEFT fine-tuning, vector databases, and production RAG pipeline architecture.',
+    department: 'Applied Generative AI Labs',
+    startDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    endDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+    timeLimitMinutes: 25,
+    status: 'active',
+    questionSource: 'hybrid',
+    createdBy: 'sarah.recruiter@interviewx.ai',
+    createdAt: '2026-10-25T09:00:00.000Z',
+    totalSubmissionsCount: 1,
+    questions: [
+      {
+        id: 'cq-ai-1',
+        questionNumber: 1,
+        category: 'Technical',
+        difficulty: 'Intermediate',
+        questionText: 'Describe how you design a multi-stage RAG pipeline that mitigates hallucinations while maintaining sub-second query latency.',
+        expectedConcepts: ['Hybrid Search', 'Cross-Encoder Reranking', 'Vector Chunking', 'Metadata Filtering'],
+        rubric: {
+          technicalCorrectness: 'Understanding of dense vs sparse embeddings and reranker models',
+          relevance: 'Practical latency reduction and accuracy trade-offs',
+          reasoning: 'System design structure',
+          communication: 'Crisp technical delivery'
+        },
+        modelAnswerHint: 'Discuss BM25 + dense vector embeddings, reciprocal rank fusion, and quantized cross-encoders.'
       },
-      modelAnswerHint: 'Discuss @next/bundle-analyzer, dynamic imports, explicit image dimensions, and font swapping.'
-    }
-  ]
-};
+      {
+        id: 'cq-ai-2',
+        questionNumber: 2,
+        category: 'Resume-Project',
+        difficulty: 'Intermediate',
+        questionText: 'Walk us through a machine learning model you fine-tuned and deployed to production. How did you evaluate output quality?',
+        expectedConcepts: ['LoRA', 'PEFT', 'Quantization', 'Evaluation Benchmarks'],
+        rubric: {
+          technicalCorrectness: 'Rigorous fine-tuning and evaluation mechanics',
+          relevance: 'Clear real-world business outcomes',
+          reasoning: 'Model parameter trade-offs',
+          communication: 'Well-structured explanation'
+        },
+        modelAnswerHint: 'Highlight dataset curation, LoRA rank hyperparameters, and Ragas or BLEU/ROUGE metrics.'
+      }
+    ]
+  },
+  {
+    id: 'campaign-fullstack-2026',
+    title: 'Full-Stack Software Engineer Campus Drive 2026',
+    targetRole: 'Full-Stack Developer',
+    jobDescription:
+      'Campus recruitment drive for graduates and upcoming engineers skilled in TypeScript, Node.js/Next.js, SQL/PostgreSQL databases, and RESTful API architecture.',
+    department: 'Enterprise Application Engineering',
+    startDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    endDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+    timeLimitMinutes: 20,
+    status: 'active',
+    questionSource: 'hybrid',
+    createdBy: 'sarah.recruiter@interviewx.ai',
+    createdAt: '2026-10-23T11:00:00.000Z',
+    totalSubmissionsCount: 0,
+    questions: [
+      {
+        id: 'cq-fs-1',
+        questionNumber: 1,
+        category: 'Technical',
+        difficulty: 'Intermediate',
+        questionText: 'Explain how you design a resilient relational database schema with ACID guarantees and indexed queries for high-throughput transactions.',
+        expectedConcepts: ['B-Tree Indexing', 'Foreign Keys', 'Transaction Isolation Levels', 'Query Optimization'],
+        rubric: {
+          technicalCorrectness: 'Relational algebra and indexing precision',
+          relevance: 'High concurrency transaction strategies',
+          reasoning: 'Explains normalization vs denormalization trade-offs',
+          communication: 'Clear and methodical explanation'
+        },
+        modelAnswerHint: 'Explain composite indexes, EXPLAIN ANALYZE query planning, and connection pooling.'
+      }
+    ]
+  }
+];
 
 export function getStoredCampaigns(): InterviewCampaign[] {
-  if (!isBrowser) return [DEFAULT_CAMPAIGN];
+  if (!isBrowser) return DEFAULT_CAMPAIGNS;
   try {
     const raw = localStorage.getItem(CAMPAIGNS_KEY);
     if (!raw) {
-      localStorage.setItem(CAMPAIGNS_KEY, JSON.stringify([DEFAULT_CAMPAIGN]));
-      return [DEFAULT_CAMPAIGN];
+      localStorage.setItem(CAMPAIGNS_KEY, JSON.stringify(DEFAULT_CAMPAIGNS));
+      return DEFAULT_CAMPAIGNS;
     }
-    return JSON.parse(raw) as InterviewCampaign[];
+    const parsed = JSON.parse(raw) as InterviewCampaign[];
+    if (parsed.length < 2) {
+      localStorage.setItem(CAMPAIGNS_KEY, JSON.stringify(DEFAULT_CAMPAIGNS));
+      return DEFAULT_CAMPAIGNS;
+    }
+    return parsed;
   } catch (e) {
-    return [DEFAULT_CAMPAIGN];
+    return DEFAULT_CAMPAIGNS;
   }
 }
 

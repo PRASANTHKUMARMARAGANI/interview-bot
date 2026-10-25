@@ -212,17 +212,23 @@ export default function InterviewerPortalPage() {
           <h1 className="text-3xl font-extrabold text-white tracking-tight">
             Interviewer Portal
           </h1>
-          <p className="text-xs text-slate-300">
-            Logged in as <span className="font-semibold text-cyan-400">{currentUser?.name || 'Recruiter'}</span> • {currentUser?.organization}
+          <p className="text-xs text-slate-300 flex items-center gap-2 flex-wrap">
+            <span>Interviewer: <span className="font-semibold text-white">{currentUser?.name || 'Sarah Jenkins'}</span></span>
+            <span>•</span>
+            <span className="font-mono text-cyan-300 font-bold px-2 py-0.5 rounded-lg bg-indigo-950/80 border border-indigo-500/30">
+              Registered ID: {currentUser?.recruiterId || 'REC-2026-904'}
+            </span>
+            <span>•</span>
+            <span>{currentUser?.organization || 'TechVision Enterprise Talent'}</span>
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <Link
-            href="/login"
-            className="px-4 py-2 rounded-xl text-xs font-semibold glass-panel text-slate-300 hover:text-white border border-slate-700"
+            href="/login?portal=student"
+            className="px-4 py-2 rounded-xl text-xs font-semibold glass-panel text-cyan-300 hover:text-white border border-cyan-500/30"
           >
-            Switch Role / Portal
+            Switch to Student Portal
           </Link>
 
           <button

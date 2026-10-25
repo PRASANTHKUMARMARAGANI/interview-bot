@@ -66,19 +66,19 @@ export default function LandingPage() {
               {/* Distinct Portal Entry Action Buttons */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-2">
                 <Link
-                  href="/candidate"
+                  href="/login?portal=student"
                   className="px-6 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white shadow-lg shadow-cyan-500/25 flex items-center gap-2.5 transition-all group"
                 >
                   <Play className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
-                  <span>Student Portal (Take Interview)</span>
+                  <span>Student Portal (Enter Roll No)</span>
                 </Link>
 
                 <Link
-                  href="/interviewer"
+                  href="/login?portal=interviewer"
                   className="px-6 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-600/30 flex items-center gap-2.5 transition-all group"
                 >
                   <Briefcase className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                  <span>Interviewer Portal (Review Submissions)</span>
+                  <span>Interviewer Portal (Enter Registered ID)</span>
                 </Link>
 
                 <Link
